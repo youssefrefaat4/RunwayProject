@@ -1,27 +1,9 @@
+---
+# See full syntax at https://docs.onica.com/projects/runway
 deployments:
   - modules:
-      # - VPC.cfn                # directory w/ Serverless stack
       - path: sampleapp.cfn
-        type: cloudformation  # not required; implied from ".cfn" directory extension
-        environments:
-          dev: true     
-        parameters:
-          VpcCidr: 10.40.0.0/16
-          PrivateSubnetCidr1: 10.40.10.0/24
-          PrivateSubnetCidr2: 10.40.20.0/24
-          PublicSubnetCidr1: 10.40.1.0/24
-          PublicSubnetCidr2: 10.40.2.0/24      
-      # - path: Servers.cfn
-      #   type: cloudformation  # not required; implied from ".cfn" directory extension
-      #   environments:
-      #     dev: true           
-      #   parameters:
-      #     BastionAllowedIP: 0.0.0.0/0
-      #     InstanceType: t3.micro
-      #     KeyName: 'CFN' 
-      #     AmiId: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
-      # - Servers.cfn # directory w/ terraform configurationa                  
+      - path: sampleapp.tf
+      # - etc...
     regions:
       - us-east-1
-    environments:
-      dev: main
