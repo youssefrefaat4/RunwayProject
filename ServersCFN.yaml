@@ -1,0 +1,186 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'EC2 with user data from CloudFormation'
+Parameters: 
+  BastionAllowedIP: 
+    Description: Please enter the bastion host allowed IP
+    Type: String
+  InstanceType:
+    Description: Choose the instance type
+    Type: String
+    Default: t3.micro
+    AllowedValues: [t2.nano, t2.micro, t2.small, t2.medium, t2.large, t2.xlarge, t2.2xlarge,
+      t3.nano, t3.micro, t3.small, t3.medium, t3.large, t3.xlarge]
+  KeyName: 
+    Description: Choose the Key Name
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: must be the name of an existing EC2 KeyPair. 
+  AmiId:
+    Type:  'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'     
+Resources:
+  PublicSG:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      VpcId:
+        Fn::ImportValue:
+          Fn::Sub: VPCID      
+      GroupDescription: Allow access from HTTP and SSH traffic
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: 10.40.0.0/16
+  PrivateSG:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      VpcId:
+        Fn::ImportValue:
+          Fn::Sub: VPCID
+      GroupDescription: Allow access from HTTP and SSH traffic
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: 10.40.0.0/16
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: 10.40.0.0/16
+  BastionSG:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      VpcId:
+        Fn::ImportValue:
+          Fn::Sub: VPCID
+      GroupDescription: Allow access from HTTP and SSH traffic
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: !Ref BastionAllowedIP
+  PulicInstance1:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: !Ref 'AmiId'
+      KeyName: !Ref KeyName
+      Tags:
+        - Key: 'Name'
+          Value: Web-public1
+      NetworkInterfaces:
+        - GroupSet:
+            - !Ref PublicSG
+          DeviceIndex: '0'
+          DeleteOnTermination: 'true'
+          SubnetId:
+            Fn::ImportValue:
+              Fn::Sub: PubSub1-ID          
+      UserData: !Base64
+        'Fn::Sub': |
+          #!/bin/bash -xe
+          #!/bin/bash
+          sudo yum update -y
+          sudo yum install -y httpd
+          sudo systemctl start httpd
+          sudo systemctl enable httpd              
+          sudo echo "This is $(hostname)" > /var/www/html/index.html
+          sudo systemctl restart httpd                          
+  PulicInstance2:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: !Ref 'AmiId'
+      KeyName: !Ref KeyName
+      Tags:
+        - Key: 'Name'
+          Value: Web-public2
+      NetworkInterfaces:
+        - GroupSet:
+            - !Ref PublicSG
+          DeviceIndex: '0'
+          DeleteOnTermination: 'true'
+          SubnetId:
+            Fn::ImportValue:
+              Fn::Sub: PubSub2-ID          
+      UserData: !Base64
+        'Fn::Sub': |
+          #!/bin/bash -xe
+          sudo yum update -y
+          sudo yum install -y httpd
+          sudo systemctl start httpd
+          sudo systemctl enable httpd              
+          sudo eecho "This is $(hostname)" > /var/www/html/index.html
+          sudo systemctl restart httpd
+  PrivateInstance1:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: !Ref 'AmiId'
+      KeyName: !Ref KeyName
+      Tags:
+        - Key: 'Name'
+          Value: Web-private1
+      NetworkInterfaces:
+        - GroupSet:
+            - !Ref PrivateSG
+          DeviceIndex: '0'
+          DeleteOnTermination: 'true'
+          SubnetId:
+            Fn::ImportValue:
+              Fn::Sub: PrivSub1-ID          
+      UserData: !Base64
+        'Fn::Sub': |
+          #!/bin/bash -xe
+          sudo yum update -y
+          sudo yum install -y httpd
+          sudo systemctl start httpd
+          sudo systemctl enable httpd              
+          sudo echo "This is $(hostname)" > /var/www/html/index.html
+          sudo systemctl restart httpd                   
+  PrivateInstance2:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: !Ref 'AmiId'
+      KeyName: !Ref KeyName
+      Tags:
+        - Key: 'Name'
+          Value: Web-private2
+      NetworkInterfaces:
+        - GroupSet:
+            - !Ref PrivateSG
+          DeviceIndex: '0'
+          DeleteOnTermination: 'true'
+          SubnetId:
+            Fn::ImportValue:
+              Fn::Sub: PrivSub2-ID          
+      UserData: !Base64
+        'Fn::Sub': |
+          #!/bin/bash -xe
+          sudo yum update -y
+          sudo yum install -y httpd
+          sudo systemctl start httpd
+          sudo systemctl enable httpd              
+          sudo echo "This is $(hostname)" > /var/www/html/index.html
+          sudo systemctl restart httpd
+  BastionInstance:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: !Ref 'AmiId'
+      KeyName: !Ref KeyName
+      Tags:
+        - Key: 'Name'
+          Value: Bastion
+      NetworkInterfaces:
+        - GroupSet:
+            - !Ref BastionSG
+          DeviceIndex: '0'
+          DeleteOnTermination: 'true'
+          SubnetId:
+            Fn::ImportValue:
+              Fn::Sub: PubSub1-ID                    
