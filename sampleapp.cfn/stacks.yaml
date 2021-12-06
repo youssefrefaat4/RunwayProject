@@ -6,7 +6,7 @@ tags:
   CreatedBy: "youssefsaadallah"
 stacks:
   VPC:
-    template_path: templates/VpcCFN.yaml  # also supports json templates
+    template_path: templates/VpcCFN3.yaml  # also supports json templates
     variables:
       VpcCidr: ${VpcCidr}
       PrivateSubnetCidr1: ${PrivateSubnetCidr1}
