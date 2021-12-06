@@ -2,10 +2,23 @@ namespace: ${namespace}
 cfngin_bucket: ${cfngin_bucket_name}
 
 sys_path: ./
-
+tags:
+  CreatedBy: "youssefsaadallah"
 stacks:
-  tf-state:
-    template_path: templates/tf_state.yml  # also supports json templates
+  VPC:
+    template_path: templates/VpcCFN.yaml  # also supports json templates
     variables:
-      BucketName: ${default tf_state_bucket_name::undefined}
-      TableName: ${default tf_state_table_name::undefined}
+      VpcCidr: ${VpcCidr}
+      PrivateSubnetCidr1: ${PrivateSubnetCidr1}
+      PrivateSubnetCidr2: ${PrivateSubnetCidr2}
+      PublicSubnetCidr1: ${PublicSubnetCidr1}
+      PublicSubnetCidr2: ${PublicSubnetCidr2}
+  Servers:
+    template_path: templates/ServersCFN.yaml  # also supports json templates
+    requires:
+      - VPC   
+    variables:
+      BastionAllowedIP: ${BastionAllowedIP}
+      InstanceType: ${InstanceType}
+      KeyName: ${KeyName}
+      AmiId: ${AmiId} 

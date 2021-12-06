@@ -1,9 +1,8 @@
 ---
 # See full syntax at https://docs.onica.com/projects/runway
+ignore_git_branch: true
 deployments:
   - modules:
       - path: sampleapp.cfn
-      - path: sampleapp.tf
-      # - etc...
     regions:
       - us-east-1
