@@ -33,7 +33,7 @@ Resources:
         - IpProtocol: tcp
           FromPort: '22'
           ToPort: '22'
-          CidrIp: 10.40.0.0/16       
+          CidrIp: 10.40.0.0/16
   PrivateSG:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
@@ -49,8 +49,7 @@ Resources:
         - IpProtocol: tcp
           FromPort: '22'
           ToPort: '22'
-          CidrIp: 10.40.0.0/16 
-          CidrIp: 10.40.0.0/16              
+          CidrIp: 10.40.0.0/16
   BastionSG:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
@@ -114,7 +113,7 @@ Resources:
           sudo yum install -y httpd
           sudo systemctl start httpd
           sudo systemctl enable httpd              
-          sudo eecho "This is $(hostname)" > /var/www/html/index.html
+          sudo echo "This is $(hostname)" > /var/www/html/index.html
           sudo systemctl restart httpd
   PrivateInstance1:
     Type: 'AWS::EC2::Instance'
